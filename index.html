@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Marble Jar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Plan: deep-navy page, one pale "glass" jar as the single bright object, coral for the one primary action.
+   Layout: stacked on phones; jar left, controls and counts right from 900px. */
+:root{
+  --navy:#0B3954;
+  --navy-2:#11466A;
+  --sky:#BFD7EA;
+  --coral:#FF6663;
+  --lime:#E0FF4F;
+  --paper:#EAF1F6;
+  --ink:#FEFFFE;
+  --muted:#9DBBD0;
+  --line:rgba(191,215,234,.22);
+  --display:"Bricolage Grotesque","Arial Narrow",Arial,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--navy);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 18px 56px}
+h1,h2,h3{font-family:var(--display);line-height:1.08;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.5rem,9vw,4.6rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.5rem;font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.05rem;font-weight:600}
+p{margin:0}
+.kicker{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--lime);font-weight:600}
+.lead{font-size:1.15rem;color:var(--sky);max-width:34em;margin-top:14px}
+header{padding:8px 0 26px}
+header h1{margin-top:10px}
+
+.stage{display:grid;gap:22px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.stage{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:36px;align-items:start}}
+
+.jarcard{background:var(--paper);border-radius:22px;padding:14px 14px 10px;color:var(--navy);position:relative}
+.gen{display:inline-block;margin:2px 0 6px 4px;font-family:var(--display);font-weight:800;font-size:.95rem;background:var(--navy);color:var(--ink);padding:5px 12px;border-radius:99px}
+.gen b{color:var(--lime);font-weight:800}
+#jar{display:block;width:100%;height:auto}
+#jar g.m{animation:drop .5s cubic-bezier(.3,1.3,.5,1) both}
+@keyframes drop{from{transform:translateY(-46px);opacity:0}to{transform:none;opacity:1}}
+.cap{min-height:3.1em;margin:4px 6px 4px;font-size:.98rem;color:var(--navy);font-weight:500}
+
+.panel{background:var(--navy-2);border-radius:22px;padding:20px}
+.controls{display:grid;gap:12px}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;min-height:48px;padding:0 20px;font-weight:600}
+button:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+.primary{background:var(--coral);color:var(--navy);font-size:1.05rem;flex:1 1 220px;font-weight:600}
+.primary:disabled{background:#35607F;color:#86A6BC;cursor:not-allowed}
+.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.ghost:hover{border-color:var(--sky)}
+.switch{display:flex;gap:14px;align-items:center;text-align:left;background:rgba(11,57,84,.55);border:1.5px solid var(--line);color:var(--ink);width:100%;padding:12px 14px;border-radius:14px;min-height:60px}
+.switch .tr{flex:none;width:46px;height:26px;border-radius:99px;background:#35607F;position:relative;transition:background .2s}
+.switch .tr::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--ink);transition:transform .2s}
+.switch[aria-checked="true"]{border-color:var(--lime)}
+.switch[aria-checked="true"] .tr{background:var(--lime)}
+.switch[aria-checked="true"] .tr::after{transform:translateX(20px);background:var(--navy)}
+.switch small{display:block;color:var(--muted);font-size:.88rem;font-weight:400}
+
+.bars{display:grid;gap:9px;margin:22px 0 4px}
+.bar{display:grid;grid-template-columns:22px 62px minmax(0,1fr) 30px;gap:10px;align-items:center;font-size:.95rem}
+.bar .sw{width:20px;height:20px;border-radius:50%;box-shadow:inset -3px -4px 6px rgba(11,57,84,.35),inset 3px 3px 5px rgba(255,255,255,.55)}
+.bar .track{position:relative;height:12px;background:rgba(11,57,84,.6);border-radius:7px;overflow:hidden}
+.bar .fill{position:absolute;inset:0 auto 0 0;border-radius:7px;transition:width .4s}
+.bar .orig{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);opacity:.8}
+.bar .n{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.bar.gone .nm{text-decoration:line-through;color:var(--muted)}
+.legend{font-size:.82rem;color:var(--muted);margin-top:8px}
+
+.hist{margin-top:22px}
+.hist h3{margin-bottom:8px}
+#hist{display:block;width:100%;height:auto}
+.key{display:flex;gap:18px;flex-wrap:wrap;font-size:.88rem;color:var(--sky);margin-top:6px}
+.key i{display:inline-block;width:22px;height:5px;border-radius:3px;vertical-align:middle;margin-right:7px}
+
+section.explain{margin-top:52px;display:grid;gap:22px}
+.maps{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){.maps,.nums{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.card{background:var(--navy-2);border-radius:18px;padding:18px 20px;display:grid;gap:8px;align-content:start}
+.card .eq{font-family:var(--display);font-weight:800;font-size:1.2rem;line-height:1.15}
+.card p{color:var(--sky);font-size:.98rem}
+.card .eq span{color:var(--lime)}
+.nums{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.num{border-top:3px solid var(--coral);padding-top:12px}
+.num:nth-child(2){border-color:var(--sky)}
+.num:nth-child(3){border-color:var(--lime)}
+.num b{display:block;font-family:var(--display);font-size:2.1rem;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.num span{color:var(--sky);font-size:.95rem}
+.fine{color:var(--muted);font-size:.9rem;max-width:44em}
+footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){#jar g.m{animation:none}.bar .fill,.switch .tr,.switch .tr::after{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Why AI forgets</div>
+    <h1>The Marble Jar</h1>
+    <p class="lead">Fill a new jar by picking marbles at random from the last one. Press the button and watch which colours disappear.</p>
+  </header>
+
+  <main>
+    <div class="stage">
+      <div class="jarcard">
+        <div class="gen" id="gen">Generation <b id="gnum">0</b> of 8</div>
+        <svg id="jar" viewBox="0 0 360 340" role="img" aria-label="A glass jar holding 40 coloured marbles"></svg>
+        <p class="cap" id="cap" aria-live="polite"></p>
+      </div>
+
+      <div class="panel">
+        <div class="controls">
+          <div class="btnrow">
+            <button class="primary" id="next" type="button">Make the next jar</button>
+            <button class="ghost" id="run" type="button">Run to the end</button>
+            <button class="ghost" id="reset" type="button">Start over</button>
+          </div>
+          <button class="switch" id="fresh" type="button" role="switch" aria-checked="false">
+            <span class="tr" aria-hidden="true"></span>
+            <span>Add 10 fresh marbles each time<small>Taken from the original jar. This is the real data.</small></span>
+          </button>
+        </div>
+
+        <div class="bars" id="bars"></div>
+        <p class="legend">The white tick on each bar is how many there were in the original jar.</p>
+
+        <div class="hist">
+          <h3>Colours left in the jar</h3>
+          <svg id="hist" viewBox="0 0 420 190" role="img" aria-label="Chart of how many colours are left after each generation"></svg>
+          <div class="key"><span><i style="background:var(--coral)"></i>Without fresh marbles</span><span><i style="background:var(--lime)"></i>With fresh marbles</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="explain" aria-labelledby="what">
+      <h2 id="what">What the marbles stand for</h2>
+      <div class="maps">
+        <div class="card"><div class="eq">A colour <span>=</span> a kind of code pattern</div><p>Some patterns are common, a few are rare. The jar starts with 16 of the most common colour and a single lime marble.</p></div>
+        <div class="card"><div class="eq">Picking at random <span>=</span> training on its own output</div><p>The next jar only contains what was picked from the last one. A colour that is missed once is gone for good.</p></div>
+        <div class="card"><div class="eq">Fresh marbles <span>=</span> real data</div><p>Adding marbles from the original jar keeps rare colours in play, so the jar stays varied for much longer.</p></div>
+      </div>
+
+      <h2>What happened in the real experiment</h2>
+      <div class="nums">
+        <div class="num"><b>6.2 → 5.3</b><span>bits of code-pattern variety for purely synthetic training, over ten generations</span></div>
+        <div class="num"><b>4.7</b><span>bits at the lowest point for syntax-filtered synthetic training (generation 6)</span></div>
+        <div class="num"><b>≈ 6.2</b><span>bits with half the training data kept real, steady the whole way</span></div>
+      </div>
+      <p class="fine">This is a toy model. Real training is messier than drawing marbles from a jar, but the effect is the same shape: rare things vanish first, and without new real data they do not come back. In the study the same pattern ended in code that stopped working by generation 4.</p>
+    </section>
+  </main>
+
+  <footer>Part of the poster “Model collapse in code-generating LLMs”. Wits Honours research, supervised by Devon Jarvis and Jonathan Evertz.</footer>
+</div>
+
+<script>
+(function(){
+  // Most common first, rarest last, so the vivid rare colours are the first to vanish.
+  var MARBLES=[
+    {n:'Sky',c:'#BFD7EA'},{n:'Ocean',c:'#3F7CAC'},{n:'Navy',c:'#0B3954'},
+    {n:'White',c:'#FEFFFE'},{n:'Coral',c:'#FF6663'},{n:'Lime',c:'#E0FF4F'}
+  ];
+  var START=[16,10,7,4,2,1], TOTAL=40, FRESH=10, MAXG=8, SVGNS='http://www.w3.org/2000/svg';
+
+  var jarEl=document.getElementById('jar'), capEl=document.getElementById('cap'), barsEl=document.getElementById('bars');
+  var gnum=document.getElementById('gnum'), nextB=document.getElementById('next'), runB=document.getElementById('run');
+  var resetB=document.getElementById('reset'), freshB=document.getElementById('fresh'), histEl=document.getElementById('hist');
+
+  function mix(hex,t,to){var n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,tr=to>>16,tg=to>>8&255,tb=to&255;
+    function f(a,z){return Math.round(a+(z-a)*t);}return 'rgb('+f(r,tr)+','+f(g,tg)+','+f(b,tb)+')';}
+
+  function original(){var a=[];START.forEach(function(k,i){for(var j=0;j<k;j++)a.push(i);});return a;}
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+  function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+  var base=original(), jar, gen, useFresh=false, timer=null;
+  var hist={plain:[],fresh:[]};
+
+  function nextJar(cur,fresh){
+    var out=[],keep=fresh?TOTAL-FRESH:TOTAL,i;
+    for(i=0;i<keep;i++)out.push(pick(cur));
+    if(fresh)for(i=0;i<FRESH;i++)out.push(pick(base));
+    return out;
+  }
+  function counts(a){return MARBLES.map(function(_,i){return a.filter(function(v){return v===i;}).length;});}
+  function colours(a){return counts(a).filter(function(n){return n>0;}).length;}
+  window.__marble={nextJar:nextJar,original:original,colours:colours,TOTAL:TOTAL};
+
+  // ----- jar drawing -----
+  (function defs(){
+    var d=document.createElementNS(SVGNS,'defs'),h='';
+    MARBLES.forEach(function(m,i){
+      h+='<radialGradient id="mg'+i+'" cx="34%" cy="30%" r="75%"><stop offset="0" stop-color="'+mix(m.c,.55,0xffffff)+'"/><stop offset=".45" stop-color="'+m.c+'"/><stop offset="1" stop-color="'+mix(m.c,.45,0x0b3954)+'"/></radialGradient>';
+    });
+    h+='<linearGradient id="glass" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".12" stop-color="#fff" stop-opacity=".05"/><stop offset=".9" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#fff" stop-opacity=".6"/></linearGradient>';
+    d.innerHTML=h;jarEl.appendChild(d);
+    var shape=document.createElementNS(SVGNS,'g');shape.setAttribute('id','shape');
+    shape.innerHTML=
+      '<rect x="96" y="14" width="168" height="22" rx="7" fill="#0B3954"/>'+
+      '<path d="M104 36 H256 V64 C256 84 340 84 346 130 V300 C346 322 330 334 308 334 H52 C30 334 14 322 14 300 V130 C20 84 104 84 104 64 Z" fill="#DCE8F0" stroke="#0B3954" stroke-width="3" stroke-linejoin="round"/>'+
+      '<path d="M104 36 H256 V64 C256 84 340 84 346 130 V300 C346 322 330 334 308 334 H52 C30 334 14 322 14 300 V130 C20 84 104 84 104 64 Z" fill="url(#glass)" opacity=".55"/>';
+    jarEl.appendChild(shape);
+    var layer=document.createElementNS(SVGNS,'g');layer.setAttribute('id','marbles');jarEl.appendChild(layer);
+  })();
+  var layer=document.getElementById('marbles');
+
+  function render(animate){
+    var arr=shuffle(jar),h='',i;
+    for(i=0;i<arr.length;i++){
+      var row=Math.floor(i/8),col=i%8;
+      var x=34+col*38+(row%2?19:0)+(Math.random()*5-2.5), y=146+row*36+(Math.random()*4-2);
+      h+='<g class="m" style="animation-delay:'+(animate?(row*45+col*14):0)+'ms'+(animate?'':';animation:none')+'">'+
+         '<ellipse cx="'+(x+2)+'" cy="'+(y+14)+'" rx="14" ry="4" fill="#0B3954" opacity=".16"/>'+
+         '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="16" fill="url(#mg'+arr[i]+')" stroke="#0B3954" stroke-opacity=".45" stroke-width="1.2"/>'+
+         '<ellipse cx="'+(x-5.5).toFixed(1)+'" cy="'+(y-6).toFixed(1)+'" rx="4.5" ry="3" fill="#fff" opacity=".7" transform="rotate(-30 '+(x-5.5).toFixed(1)+' '+(y-6).toFixed(1)+')"/></g>';
+    }
+    layer.innerHTML=h;
+    var c=counts(jar),left=colours(jar);
+    var gone=MARBLES.filter(function(_,k){return c[k]===0;}).map(function(m){return m.n;});
+    gnum.textContent=gen;
+    capEl.textContent=gen===0
+      ? 'The original jar: 6 colours, 40 marbles. Lime has only one.'
+      : left+' of 6 colours left.'+(gone.length?' Gone for good: '+gone.join(', ')+'.':' Nothing lost yet.');
+    barsEl.innerHTML=MARBLES.map(function(m,k){
+      return '<div class="bar'+(c[k]===0?' gone':'')+'"><span class="sw" style="background:'+m.c+'"></span><span class="nm">'+m.n+'</span>'+
+        '<span class="track"><span class="fill" style="width:'+(c[k]/TOTAL*100*2.4>100?100:(c[k]/TOTAL*100*2.4)).toFixed(1)+'%;background:'+m.c+'"></span>'+
+        '<span class="orig" style="left:'+Math.min(98.5,START[k]/TOTAL*100*2.4).toFixed(1)+'%"></span></span><span class="n">'+c[k]+'</span></div>';
+    }).join('');
+    nextB.disabled=gen>=MAXG;
+    nextB.textContent=gen>=MAXG?'That is generation 8':'Make the next jar';
+    drawHist();
+  }
+
+  // ----- history chart: colours left per generation, one line per mode -----
+  function drawHist(){
+    var L=34,R=12,T=10,B=28,W=420,H=190,pw=W-L-R,ph=H-T-B;
+    function X(i){return L+pw*i/MAXG;} function Y(v){return T+ph*(1-v/6);}
+    var s='',v,i;
+    for(v=0;v<=6;v+=2){s+='<line x1="'+L+'" x2="'+(L+pw)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#BFD7EA" stroke-opacity=".2"/><text x="'+(L-8)+'" y="'+(Y(v)+4)+'" font-size="12" fill="#9DBBD0" text-anchor="end">'+v+'</text>';}
+    for(i=0;i<=MAXG;i++)s+='<text x="'+X(i)+'" y="'+(H-8)+'" font-size="12" fill="#9DBBD0" text-anchor="middle">G'+i+'</text>';
+    [['plain','#FF6663'],['fresh','#E0FF4F']].forEach(function(p){
+      var a=hist[p[0]];if(!a.length)return;
+      s+='<path d="'+a.map(function(y,j){return (j?'L':'M')+X(j).toFixed(1)+' '+Y(y).toFixed(1);}).join(' ')+'" fill="none" stroke="'+p[1]+'" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>';
+      a.forEach(function(y,j){s+='<circle cx="'+X(j).toFixed(1)+'" cy="'+Y(y).toFixed(1)+'" r="4" fill="'+p[1]+'"/>';});
+    });
+    histEl.innerHTML=s;
+  }
+
+  function start(){
+    stopRun();gen=0;jar=original();
+    hist[useFresh?'fresh':'plain']=[colours(jar)];
+    render(false);
+  }
+  function step(){
+    if(gen>=MAXG)return false;
+    jar=nextJar(jar,useFresh);gen++;
+    hist[useFresh?'fresh':'plain'].push(colours(jar));
+    render(true);return true;
+  }
+  function stopRun(){if(timer){clearInterval(timer);timer=null;}runB.textContent='Run to the end';}
+  nextB.addEventListener('click',function(){stopRun();step();});
+  runB.addEventListener('click',function(){
+    if(timer){stopRun();return;}
+    if(gen>=MAXG)start();
+    runB.textContent='Pause';
+    step();
+    timer=setInterval(function(){if(!step())stopRun();},900);
+  });
+  resetB.addEventListener('click',start);
+  freshB.addEventListener('click',function(){
+    useFresh=!useFresh;freshB.setAttribute('aria-checked',String(useFresh));start();
+  });
+  start();
+})();
+</script>
+</body>
+</html>
